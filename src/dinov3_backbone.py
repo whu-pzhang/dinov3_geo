@@ -20,8 +20,12 @@ class DINOv3Backbone(BaseModule):
         init_cfg=None,
     ):
         super().__init__(init_cfg=init_cfg)
-
-        self.vit = torch.hub.load(repo_or_dir, model_name, source="local")
+        self.vit = torch.hub.load(
+            repo_or_dir,
+            model_name,
+            source="local",
+            weights=init_cfg.get("checkpoint", None),
+        )
         self.out_indices = tuple(out_indices)
         self.embed_dim = getattr(self.vit, "embed_dim", 1024)
         self.out_channels = [self.embed_dim] * len(self.out_indices)
