@@ -7,7 +7,7 @@ from mmengine.runner.checkpoint import _load_checkpoint
 
 
 @MODELS.register_module()
-class DINOv3Backbone(BaseModule):
+class DINOv3ViTBackbone(BaseModule):
     def __init__(
         self,
         *,
@@ -17,14 +17,15 @@ class DINOv3Backbone(BaseModule):
         patch_size: int = 16,
         fp16: bool = False,
         frozen: bool = False,
-        init_cfg=None,
+        init_cfg: dict = None,
     ):
         super().__init__(init_cfg=init_cfg)
         self.vit = torch.hub.load(
             repo_or_dir,
             model_name,
-            source="local",
-            weights=init_cfg.get("checkpoint", None),
+            source="github",
+            weights=init_cfg["checkpoint"],
+            skip_validation=True,
         )
         self.out_indices = tuple(out_indices)
         self.embed_dim = getattr(self.vit, "embed_dim", 1024)
