@@ -28,7 +28,7 @@ model = dict(
         model_name="dinov3_vitl16",
         out_indices=(7, 11, 15, 23),
         patch_size=16,
-        fp16=False,
+        fp16=True,
         frozen=True,
         init_cfg=dict(type="Pretrained", checkpoint=checkpoint_file),
     ),
