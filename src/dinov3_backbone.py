@@ -1,3 +1,4 @@
+# Copyright (c) Zhang Pan. All rights reserved.
 import torch
 import torch.nn as nn
 from mmengine.logging import MMLogger
