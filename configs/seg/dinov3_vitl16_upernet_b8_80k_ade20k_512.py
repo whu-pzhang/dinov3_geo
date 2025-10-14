@@ -1,6 +1,6 @@
 _base_ = [
     "mmseg::_base_/default_runtime.py",
-    "mmseg::_base_/datasets/loveda.py",
+    "mmseg::_base_/datasets/ade20k.py",
     "mmseg::_base_/schedules/schedule_80k.py",
 ]
 
@@ -19,6 +19,8 @@ data_preprocessor = dict(
 norm_cfg = dict(type="SyncBN", requires_grad=True)
 checkpoint_file = "weights/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth"
 # checkpoint_file = "weights/dinov3_vitl16_pretrain_sat493m-eadcf0ff.pth"
+
+num_classes = 150
 model = dict(
     type="EncoderDecoder",
     data_preprocessor=data_preprocessor,
@@ -28,7 +30,7 @@ model = dict(
         model_name="dinov3_vitl16",
         out_indices=(7, 11, 15, 23),
         patch_size=16,
-        fp16=False,
+        fp16=True,
         frozen=True,
         init_cfg=dict(type="Pretrained", checkpoint=checkpoint_file),
     ),
@@ -41,7 +43,7 @@ model = dict(
     decode_head=dict(
         type="UPerHead",
         in_channels=[1024, 1024, 1024, 1024],
-        num_classes=7,
+        num_classes=num_classes,
         ignore_index=255,
         in_index=[0, 1, 2, 3],
         pool_scales=(1, 2, 3, 6),
@@ -59,7 +61,7 @@ model = dict(
         num_convs=1,
         concat_input=False,
         dropout_ratio=0.1,
-        num_classes=7,
+        num_classes=num_classes,
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(type="CrossEntropyLoss", use_sigmoid=False, loss_weight=0.4),
@@ -69,7 +71,6 @@ model = dict(
     test_cfg=dict(mode="whole"),
 )
 
-
 train_dataloader = dict(batch_size=8, num_workers=8)
 
 
@@ -78,6 +79,13 @@ optim_wrapper = dict(
     _delete_=True,
     type="AmpOptimWrapper",
     optimizer=dict(type="AdamW", lr=6e-5, betas=(0.9, 0.999), weight_decay=0.05),
+    paramwise_cfg=dict(
+        custom_keys={
+            "pos_embed": dict(decay_mult=0.0),
+            "cls_token": dict(decay_mult=0.0),
+            "norm": dict(decay_mult=0.0),
+        }
+    ),
 )
 
 param_scheduler = [
